@@ -40,10 +40,9 @@ docker-compose -f generate-indexer-certs.yml run --rm generator
 docker-compose up -d
 ```
 
-** NB! Please bear in mind that this is a set up for DEV environment. Therefore, there were no specific configurations made, for example all passwords are left default. Docker compose file could be found under: /wazuh-docker/docker-compose.yml
+**NB! Please bear in mind that this is a set up for DEV environment. Therefore, there were no specific configurations made, for example all passwords are left default. Docker compose file could be found under: /wazuh-docker/docker-compose.yml**
 
-
-Screenshot:
+Screenshot after initial Wazuh installation:
 ![Alt text](/screenshots/after_initial_wazuh_install_1.jpg?raw=true "After initial Wazuh install")
 
 ### Initial Wazuh configuration and Agent installation
@@ -65,7 +64,7 @@ sudo systemctl enable wazuh-agent
 sudo systemctl start wazuh-agent
 ```
 
-Screenshot (later I have changed to a more self-explanatory Agent name):
+Screenshot after first wazuh agent installation (later I have changed to a more self-explanatory Agent name):
 ![Alt text](/screenshots/after_initial_wazuh_install_2.jpg?raw=true "After initial Wazuh Agent install")
 
 In case I understood the task right, it is required to monitor docker container via installing agent specifically on the container. 
@@ -189,25 +188,32 @@ docker run --rm -it -p 80:80 vulnerables/web-dvwa
 ```
 
 Screenshots:
+Triggering docker actions from configured Docker view:
 ![Alt text](/screenshots/docker_actions_1.jpg?raw=true "Docker actions view 1")
+
+Triggering docker actions from log view:
 ![Alt text](/screenshots/docker_actions_2.jpg?raw=true "Docker actions view 2")
+
+SQL Injection Attemp and (the last event) successful SQL Injection events:
 ![Alt text](/screenshots/sql_injection_attempt_1.jpg?raw=true "SQL Injection Attempt and Initial Access success event")
+
+Successfull SQL Injection from DVWA (view from DVWA window itself):
 ![Alt text](/screenshots/sql_injection_via_dvwa_1.jpg?raw=true "Successfull SQL Injection Attempt via DVWA from browser")
 
-There are different attack vectors that are available:
+View of different attack vectors that are available by default:
 ![Alt text](/screenshots/other_attack_vecotrs_example.jpg?raw=true "Example of other Attack vecotrs available")
 
 ### Configuring vulnerability monitoring
 Currently, Wazuh intergration with docker does not provide any out-of-the-box solutions for vulnerability monitoring (in case we do not install wazuh agent to the docker itself). 
-Therefore, I have investigated different options that are available online. From the initial investigation, I have identified three main options to do so: 
+Therefore, I have investigated different options that are available online. The three most commonly discussed are:
 * Clair
 * Anchore
 * Trivy
 
-These tools have different type of functionality that they propose. For the sake of homework, I have chosen Trivy. This tool should find and identify vulnerabilities, misconfigurations, secrets, SBOM in containers.
+These tools have different type of functionality that they propose. Trivy seems to be the most suiting the need of vulnerablity scanning. This tool should find and identify vulnerabilities, misconfigurations, secrets, SBOM in containers.
 * More about Trivy: https://github.com/aquasecurity/trivy
-I have decided to install Trivy on the client machine that is running vulnerable DVWA docker container.
-Installation:
+
+First, I have installated Trivy on the client machine that is running docker containers:
 ```
 wget https://github.com/aquasecurity/trivy/releases/download/v0.18.3/trivy_0.18.3_Linux-64bit.deb
 sudo dpkg -i trivy_0.18.3_Linux-64bit.deb
@@ -216,7 +222,7 @@ sudo dpkg -i trivy_0.18.3_Linux-64bit.deb
 By default, Trivy outputs an informative table into command line interface. However, as it is planned to use it integrated into Wazuh, I have chosen the next solution:
 1. Run Trivy with next parameters: ``--format json --output /var/ossec/logs/trivy-results.json``
 This will make the format of scan into a json and send it to the Wazuh log direcotry. From there, the log can be grabbed by Wazuh.
-2. For Wazuh to check this log file, the next configuration changes were done on the client configuration:
+2. For Wazuh to check this log file, the next configuration changes were done on the client configuration ``/var/ossec/etc/ossec.conf``:
 ```
 <localfile>
   <log_format>json</log_format>
@@ -227,8 +233,7 @@ And Wazuh agent should be restarted to apply the changes:
 ``systemctl restart wazuh-agent``
 
 3. To automatize the process, simple schedule task could be written. The scheduled task/ cron may run the script or the command itself. 
-For example:
-* Script
+* Example script (for production, I would suggest making script that goes over all docker containers found on the host)
 ```
 #!/bin/bash
 
@@ -237,18 +242,24 @@ TARGET="vulnerables/web-dvwa"
 
 trivy image --format json --output /var/ossec/logs/trivy-results.json $TARGET 2>&1
 ```
-* Cron
+* Example cron
 ```
 0 2 * * * /bin/bash ~/run_trivy.sh
 ```
 
-4. The Wazuh should now collect json and send it to the server. To make alerts from this information, decoders and rules may be neccassary. It could be also useful to rewrite the output json, since some infromation may be not required.
-Since this is a PoC, I have skipped developing custom decoder logic for the trivy json. However, I have confirmed that it is collected by agent.
+4. The Wazuh should now collect json and send it to the server. To setup proper alering on Wazuh, decoders and rules may be neccassary. It could be also useful to rewrite the output of json.
+To confirm that the json is collected by the Wazuh, we can run the next command: ``cat /var/ossec/logs/ossec.log | grep trivy-results.json``
+Screenshot of the output:
+![Alt text](/screenshots/trivy_results_collect.jpg?raw=true "Prove that Wazuh Agent collected the logs")
 
+Since this is a PoC, I have skipped developing custom decoder logic on the Wazuh side.
+
+##### Results of scan
 Trivy json output for DVWA is placed under trivy/ folder of this Git (zipped into trivy-results.zip). 
 
 
 ### Configure docker container deployment with agent
+This section explains the theoretical way of deployment of Wazuh agent directly to the docker container itself.
 In theory, it could be possible to run Wazuh agent on every single container itself. For example, it is possible to create a Dockerfile, which will run the next block of code when starting DVWA:
 ```
 # Set environment variables for Wazuh agent configuration
