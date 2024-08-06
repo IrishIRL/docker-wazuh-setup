@@ -301,7 +301,7 @@ extract_vulnerabilities(input_file, output_file)
 ```
 
 It should be discussed more which of the data it is required to get regarding the vulnerabilities. The current script is tested and is sending date, vulnerability ID and severity to Wazuh. 
-However, since this is a PoC, I have skipped developing custom decoder logic on the Wazuh side.
+In case this way suits, I would also develop a custom decoder and rules logic on the Wazuh side (for additional alerting). However, this was skipped as for PoC it seems enough.
 
 5. Results of scan: Trivy json output for DVWA is placed under trivy/ folder of this Git (zipped into trivy-results.zip). 
 
