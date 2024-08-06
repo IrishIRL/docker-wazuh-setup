@@ -1,0 +1,14 @@
+<decoder name="web-accesslog-docker">
+  <parent>json</parent>
+  <type>web-log</type>
+  <use_own_name>true</use_own_name>
+  <prematch offset="after_parent">^log":"\S+ \S+ \S+ \.*[\S+ \S\d+] \.*"\w+ \S+ HTTP\S+" \d+</prematch>
+  <regex offset="after_parent">^log":"(\S+) \S+ \S+ \.*[\S+ \S\d+] \.*"(\w+) (\S+) HTTP\S+" (\d+)</regex>
+  <order>srcip,protocol,url,id</order>
+</decoder>
+
+<decoder name="json">
+  <parent>json</parent>
+  <use_own_name>true</use_own_name>
+  <plugin_decoder>JSON_Decoder</plugin_decoder>
+</decoder>
