@@ -119,6 +119,7 @@ systemctl restart wazuh-agent
 
 #### Monitoring container runtime
 * https://documentation.wazuh.com/current/user-manual/capabilities/container-security/use-cases.html
+
 Docker container runtime is stored under ``/var/lib/docker/containers/<CONTAINER_ID>/<CONTAINER_ID>-json.log`` by default. It is useful to monitor this place as well. 
 To do so, the next configuration should be added into ``/var/ossec/etc/ossec.conf`` file:
 ```
@@ -142,7 +143,7 @@ pip3 install docker==7.1.0 urllib3==2.2.2 requests==2.32.2
 
 ### Wazuh Server configuration
 Several decoders were added to the server via Wazuh visual interface:
-`` Server management -> Decoders -> Custom deecoders -> local_decoders.xml``
+``Server management -> Decoders -> Custom deecoders -> local_decoders.xml``
 All decoders will be saved under decodes/ section of this Git page.
 
 ```
