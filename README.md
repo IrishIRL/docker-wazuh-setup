@@ -249,13 +249,13 @@ trivy image --format json --output /var/ossec/logs/trivy-results.json $TARGET 2>
 
 4. The Wazuh should now collect json and send it to the server. To setup proper alering on Wazuh, decoders and rules may be neccassary. It could be also useful to rewrite the output of json.
 To confirm that the json is collected by the Wazuh, we can run the next command: ``cat /var/ossec/logs/ossec.log | grep trivy-results.json``
+
 Screenshot of the output:
 ![Alt text](/screenshots/trivy_results_collect.jpg?raw=true "Prove that Wazuh Agent collected the logs")
 
 Since this is a PoC, I have skipped developing custom decoder logic on the Wazuh side.
 
-##### Results of scan
-Trivy json output for DVWA is placed under trivy/ folder of this Git (zipped into trivy-results.zip). 
+5. Results of scan: Trivy json output for DVWA is placed under trivy/ folder of this Git (zipped into trivy-results.zip). 
 
 
 ### Configure docker container deployment with agent
