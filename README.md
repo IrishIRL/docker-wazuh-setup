@@ -253,7 +253,55 @@ To confirm that the json is collected by the Wazuh, we can run the next command:
 Screenshot of the output:
 ![Alt text](/screenshots/trivy_results_collect.jpg?raw=true "Prove that Wazuh Agent collected the logs")
 
-Since this is a PoC, I have skipped developing custom decoder logic on the Wazuh side.
+As an example, I have also created a small python script that will clear most of information (input.json) and pass simpler information to output.json (which could be then sent to Wazuh)
+```
+import json
+from datetime import datetime
+
+def extract_vulnerabilities(input_file, output_file):
+    try:
+        # Read the input JSON file
+        with open(input_file, 'r') as infile:
+            data = json.load(infile)
+
+        # Prepare a list to hold the extracted logs
+        logs = []
+
+        # Get the current date and time
+        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        # Iterate through the vulnerabilities
+        for item in data:
+            if 'Vulnerabilities' in item:
+                for vulnerability in item['Vulnerabilities']:
+                    vulnerability_id = vulnerability.get('VulnerabilityID')
+                    severity = vulnerability.get('Severity')
+                    if vulnerability_id and severity:
+                        # Create a log entry in the desired format with date
+                        log_entry = f'{current_time} - VulnerabilityID: {vulnerability_id}, Severity: {severity}'
+                        logs.append({"log": log_entry})
+
+        # Write the logs to the output JSON file
+        with open(output_file, 'w') as outfile:
+            for log in logs:
+                json.dump(log, outfile)
+                outfile.write('\n')  # Write each log entry on a new line
+
+        print(f"Extracted {len(logs)} vulnerabilities to {output_file}")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+# Specify the input and output file paths
+input_file = 'input.json'  # Replace with your input file path
+output_file = 'output.json'  # Replace with your desired output file path
+
+# Run the extraction
+extract_vulnerabilities(input_file, output_file)
+```
+
+It should be discussed more which of the data it is required to get regarding the vulnerabilities. The current script is tested and is sending date, vulnerability ID and severity to Wazuh. 
+However, since this is a PoC, I have skipped developing custom decoder logic on the Wazuh side.
 
 5. Results of scan: Trivy json output for DVWA is placed under trivy/ folder of this Git (zipped into trivy-results.zip). 
 
