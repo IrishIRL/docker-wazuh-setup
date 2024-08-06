@@ -187,7 +187,7 @@ DVWA installation:
 docker run --rm -it -p 80:80 vulnerables/web-dvwa
 ```
 
-Screenshots:
+#### Screenshots
 Triggering docker actions from configured Docker view:
 ![Alt text](/screenshots/docker_actions_1.jpg?raw=true "Docker actions view 1")
 
