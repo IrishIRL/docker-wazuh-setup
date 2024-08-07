@@ -1,5 +1,21 @@
 # Homework Assignment: Docker Container Setup with Wazuh for Vulnerability Scanning and Log Aggregation
 
+## Overview
+This repository contains code that I am sharing for review purposes only. It is intended for evaluation by InBank AS as part of the employment consideration process.
+
+## Important Notice
+By accessing this code, you agree to the following terms:
+
+1. **Review Only**: The code is provided solely for the purpose of review and evaluation. It may not be used, modified, or distributed in any form without my explicit written permission.
+
+2. **No Commercial Use**: The code may not be used for any commercial purposes or in any production environment without my prior consent.
+
+3. **Intellectual Property**: I retain all rights to the code and any associated intellectual property. Unauthorized use of the code may result in legal action.
+
+If you have any questions or require further clarification, please feel free to contact me at shafranmark@protonmail.com. 
+
+Thank you for your understanding!
+
 ## Assignment
 ### Objective
 The goal of this homework assignment is to assess your ability to set up and configure Docker containers, install and configure security tools, and perform vulnerability scanning and log aggregation.
@@ -18,21 +34,6 @@ https://documentation.wazuh.com/current/deployment-options/docker/wazuh-containe
 * Vulnerable container
 https://hub.docker.com/r/vulnerables/web-dvwa
 
-## Overview
-This repository contains code that I am sharing for review purposes only. It is intended for evaluation by InBank AS as part of the employment consideration process.
-
-## Important Notice
-By accessing this code, you agree to the following terms:
-
-1. **Review Only**: The code is provided solely for the purpose of review and evaluation. It may not be used, modified, or distributed in any form without my explicit written permission.
-
-2. **No Commercial Use**: The code may not be used for any commercial purposes or in any production environment without my prior consent.
-
-3. **Intellectual Property**: I retain all rights to the code and any associated intellectual property. Unauthorized use of the code may result in legal action.
-
-If you have any questions or require further clarification, please feel free to contact me at shafranmark@protonmail.com. 
-
-Thank you for your understanding!
 
 ## Implementation
 ### Initial installation of Wazuh 
