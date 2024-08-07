@@ -220,27 +220,27 @@ sudo dpkg -i trivy_0.18.3_Linux-64bit.deb
 ```
 
 By default, Trivy outputs an informative table into command line interface. However, as it is planned to use it integrated into Wazuh, I have chosen the next solution:
-1. Run Trivy with next parameters: ``--format json --output /var/ossec/logs/trivy-results.json``
+1. Run Trivy with next parameters: ``--format json --output /var/ossec/logs/trivy_results_o.json``
 This will make the format of scan into a json and send it to the Wazuh log direcotry. From there, the log can be grabbed by Wazuh.
 2. For Wazuh to check this log file, the next configuration changes were done on the client configuration ``/var/ossec/etc/ossec.conf``:
 ```
 <localfile>
   <log_format>json</log_format>
-  <location>/var/ossec/logs/trivy-results.json</location>
+  <location>/var/ossec/logs/trivy_results_o.json</location>
 </localfile>
 ```
 And Wazuh agent should be restarted to apply the changes:
 ``systemctl restart wazuh-agent``
 
 3. To automatize the process, simple schedule task could be written. The scheduled task/ cron may run the script or the command itself. 
-* Example script (for production, I would suggest making script that goes over all docker containers found on the host)
+* Example script, could be also found under ``trivy\trivy_example_script.sh`` (for production, I would suggest making script that goes over all docker containers found on the host):
 ```
 #!/bin/bash
 
 # Define the target to scan (e.g., a Docker image or a directory)
 TARGET="vulnerables/web-dvwa"
 
-trivy image --format json --output /var/ossec/logs/trivy-results.json $TARGET 2>&1
+trivy image --format json --output /var/ossec/logs/trivy_results_o.json $TARGET 2>&1
 ```
 * Example cron
 ```
@@ -248,63 +248,40 @@ trivy image --format json --output /var/ossec/logs/trivy-results.json $TARGET 2>
 ```
 
 4. The Wazuh should now collect json and send it to the server. To setup proper alering on Wazuh, decoders and rules may be neccassary. It could be also useful to rewrite the output of json.
-To confirm that the json is collected by the Wazuh, we can run the next command: ``cat /var/ossec/logs/ossec.log | grep trivy-results.json``
+To confirm that the json is collected by the Wazuh, we can run the next command: ``cat /var/ossec/logs/ossec.log | grep trivy_results_o.json``
 
-Screenshot of the output:
+Screenshot of the output (previosly, results file was called "trivy-results.json"):
 ![Alt text](/screenshots/trivy_results_collect.jpg?raw=true "Prove that Wazuh Agent collected the logs")
 
-As an example, I have also created a small python script that will clear most of information (input.json) and pass simpler information to output.json (which could be then sent to Wazuh)
+
+As an example, I have also created a small python script that will take an input file "trivy_results_i.json" and clean it to "trivy_results_o.json". Both script (``trivy_script_example.py``) and input/ output files are located under ``trivy`` directory of this Git. For the "trivy_results_i.json" I have all vulnerabilities that were found by trivy tool (around 2400 vulnerabilities). The output file and the following screenshots have only 90 of these vulnerabilities. I have manually left less vulnerabilities in the output file to mitigate overloading my local instance of Wazuh during the test phase. 
+NB! The current script is sending small amount of information about vulnerabilities (vulnerability ID and severity). This was done as an example script that could be implemented. However, for production environment, I would suggest rising the amount of information sent to Wazuh for better visibility.
+
+5. I have also configured a small alert rule on the Wazuh side (``Server management -> Rules -> Add new rule``).
+The rule is filtering all trivy_results_o.json by the ``program_name`` attribute which is set to ``trivy-scan`` for all vulnerabilities.
+Rule (could be also found under ``trivy`` directory in Git): 
 ```
-import json
-from datetime import datetime
+<group name="custom_vulnerability_rules">
+  <rule id="100005" level="14">
+    <field name="program_name">trivy-scan</field> 
+    <decoded_as>json</decoded_as>
+    <description>Vulnerability detected</description>
+  </rule>
+</group>
+``` 
+After the rule is added, the Wazuh manager should be restarted.
+**NB! As it could be noticed, currently, the level of alert is set for 14. In the production environment, it is required to configure different alert level for different severity of vulnerability.**
 
-def extract_vulnerabilities(input_file, output_file):
-    try:
-        # Read the input JSON file
-        with open(input_file, 'r') as infile:
-            data = json.load(infile)
+Screenshots:
 
-        # Prepare a list to hold the extracted logs
-        logs = []
+Testing newly implemented rule in Wazuh:
+![Alt text](/screenshots/trivy_rules_test.jpg?raw=true "Testing trivy rule")
 
-        # Get the current date and time
-        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+Alerts on the Wazuh dashboard page (Main page) after the rule was implemented and logs collected:
+![Alt text](/screenshots/trivy_dashboard_alerts.jpg?raw=true "Main dashboard with 90 new vulnerability alerts")
 
-        # Iterate through the vulnerabilities
-        for item in data:
-            if 'Vulnerabilities' in item:
-                for vulnerability in item['Vulnerabilities']:
-                    vulnerability_id = vulnerability.get('VulnerabilityID')
-                    severity = vulnerability.get('Severity')
-                    if vulnerability_id and severity:
-                        # Create a log entry in the desired format with date
-                        log_entry = f'{current_time} - VulnerabilityID: {vulnerability_id}, Severity: {severity}'
-                        logs.append({"log": log_entry})
-
-        # Write the logs to the output JSON file
-        with open(output_file, 'w') as outfile:
-            for log in logs:
-                json.dump(log, outfile)
-                outfile.write('\n')  # Write each log entry on a new line
-
-        print(f"Extracted {len(logs)} vulnerabilities to {output_file}")
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
-
-# Specify the input and output file paths
-input_file = 'input.json'  # Replace with your input file path
-output_file = 'output.json'  # Replace with your desired output file path
-
-# Run the extraction
-extract_vulnerabilities(input_file, output_file)
-```
-
-It should be discussed more which of the data it is required to get regarding the vulnerabilities. The current script is tested and is sending date, vulnerability ID and severity to Wazuh. 
-In case this way suits, I would also develop a custom decoder and rules logic on the Wazuh side (for additional alerting). However, this was skipped as for PoC it seems enough.
-
-5. Results of scan: Trivy json output for DVWA is placed under trivy/ folder of this Git (zipped into trivy-results.zip). 
-
+Deep dive into logs (additional dashboard could be created for that in the future):
+![Alt text](/screenshots/trivy_logs.jpg?raw=true "Logs providing information about vulnerability alerts")
 
 ### Configure docker container deployment with agent
 This section explains the theoretical way of deployment of Wazuh agent directly to the docker container itself.

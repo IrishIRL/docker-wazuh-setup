@@ -1,0 +1,7 @@
+<group name="custom_vulnerability_rules">
+  <rule id="100005" level="14">
+    <field name="program_name">trivy-scan</field> 
+    <decoded_as>json</decoded_as>
+    <description>Vulnerability detected</description>
+  </rule>
+</group>
