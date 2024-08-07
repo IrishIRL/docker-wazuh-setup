@@ -310,7 +310,16 @@ After some investigations, it seems that there are missing core libraries, for e
 Unfortunately, from my point of view, setting up Wazuh agent for this particular packagee is too complex. As mentioned above, it is also a non-standart pracise to install several different applications under one docker container.
 Installing Wazuh agent as another container will not solve the issue, since agent should be installed on the same OS as other service.
 
-## After view
+## After view and some afterwords
+During this homework, I have successfully created a working standalone Wazuh SIEM with all the required functionality.
+The SIEM is created using Docker container and configured as was required in the homework objective section. Additionally, I have configured docker container monitoring, which is monitoring for all docker related manipulations. Afterwards, I have created a monitoring of docker logs that gave me an opportunity to monitor different type of security alerts. This functionality provided me with possibility to see different events that could happen on the container, for example, it could be used to monitor if there are any SQL injection or XSS attack vectors. Furthermore, I have created and configured Trivy tool, which provides a full overview of all vulnerabilities that are currently available on docker containers. I have also implemented an example of an alert that could be created, when a new vulnerability is identified. Lastly, I have also explain my opinion on the installation of Wazuh agent on the vulnerable application container itself.
+
+Things to mention: current setup is enough for development and testing of my skills. However, I would not suggest implementing it into production, due to limitations in current solutions mentioned in below sections.
+Depending on the current infrastructure, there should be also additional investigations and testings regarding the vulnerability solution chosen by me. It could be, that other solutions would be better for the company infrastucture environment. Lastly, there are also possibilities to implement vulnerability scanning outside of SIEM solution, which have its own benefits.
+
+Screenshots of Wazuh after all implementations (Before vulnerability scanner was implemented):
 ![Alt text](/screenshots/wazuh_view_1.jpg?raw=true "Wazuh view 1")
 ![Alt text](/screenshots/wazuh_view_2.jpg?raw=true "Wazuh view 2")
 
+The next day after the vulnerability scanner was implemented:
+![Alt text](/screenshots/wazuh_view_3.jpg?raw=true "Wazuh view 3")
