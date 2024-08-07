@@ -255,11 +255,12 @@ Screenshot of the output (previosly, results file was called "trivy-results.json
 
 
 As an example, I have also created a small python script that will take an input file "trivy_results_i.json" and clean it to "trivy_results_o.json". Both script (``trivy_script_example.py``) and input/ output files are located under ``trivy`` directory of this Git. For the "trivy_results_i.json" I have all vulnerabilities that were found by trivy tool (around 2400 vulnerabilities). The output file and the following screenshots have only 90 of these vulnerabilities. I have manually left less vulnerabilities in the output file to mitigate overloading my local instance of Wazuh during the test phase. 
-NB! The current script is sending small amount of information about vulnerabilities (vulnerability ID and severity). This was done as an example script that could be implemented. However, for production environment, I would suggest rising the amount of information sent to Wazuh for better visibility.
+
+**NB! The current script is sending small amount of information about vulnerabilities (vulnerability ID and severity). This was done as an example script that could be implemented. However, for production environment, I would suggest rising the amount of information sent to Wazuh for better visibility.**
 
 5. I have also configured a small alert rule on the Wazuh side (``Server management -> Rules -> Add new rule``).
 The rule is filtering all trivy_results_o.json by the ``program_name`` attribute which is set to ``trivy-scan`` for all vulnerabilities.
-Rule (could be also found under ``trivy`` directory in Git): 
+Rule (could be also found under ``server-configuration\trivy_rules.xml`` directory in Git): 
 ```
 <group name="custom_vulnerability_rules">
   <rule id="100005" level="14">
@@ -278,6 +279,7 @@ Testing newly implemented rule in Wazuh:
 ![Alt text](/screenshots/trivy_rules_test.jpg?raw=true "Testing trivy rule")
 
 Alerts on the Wazuh dashboard page (Main page) after the rule was implemented and logs collected:
+
 ![Alt text](/screenshots/trivy_dashboard_alerts.jpg?raw=true "Main dashboard with 90 new vulnerability alerts")
 
 Deep dive into logs (additional dashboard could be created for that in the future):
@@ -308,7 +310,16 @@ After some investigations, it seems that there are missing core libraries, for e
 Unfortunately, from my point of view, setting up Wazuh agent for this particular packagee is too complex. As mentioned above, it is also a non-standart pracise to install several different applications under one docker container.
 Installing Wazuh agent as another container will not solve the issue, since agent should be installed on the same OS as other service.
 
-## After view
+## After view and some afterwords
+During this homework, I have successfully created a working standalone Wazuh SIEM with all the required functionality.
+The SIEM is created using Docker container and configured as was required in the homework objective section. Additionally, I have configured docker container monitoring, which is monitoring for all docker related manipulations. Afterwards, I have created a monitoring of docker logs that gave me an opportunity to monitor different type of security alerts. This functionality provided me with possibility to see different events that could happen on the container, for example, it could be used to monitor if there are any SQL injection or XSS attack vectors. Furthermore, I have created and configured Trivy tool, which provides a full overview of all vulnerabilities that are currently available on docker containers. I have also implemented an example of an alert that could be created, when a new vulnerability is identified. Lastly, I have also explain my opinion on the installation of Wazuh agent on the vulnerable application container itself.
+
+Things to mention: current setup is enough for development and testing of my skills. However, I would not suggest implementing it into production, due to limitations in current solutions mentioned in below sections.
+Depending on the current infrastructure, there should be also additional investigations and testings regarding the vulnerability solution chosen by me. It could be, that other solutions would be better for the company infrastucture environment. Lastly, there are also possibilities to implement vulnerability scanning outside of SIEM solution, which have its own benefits.
+
+Screenshots of Wazuh after all implementations (Before vulnerability scanner was implemented):
 ![Alt text](/screenshots/wazuh_view_1.jpg?raw=true "Wazuh view 1")
 ![Alt text](/screenshots/wazuh_view_2.jpg?raw=true "Wazuh view 2")
 
+The next day after the vulnerability scanner was implemented:
+![Alt text](/screenshots/wazuh_view_3.jpg?raw=true "Wazuh view 3")
