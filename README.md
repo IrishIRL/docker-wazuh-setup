@@ -260,7 +260,7 @@ As an example, I have also created a small python script that will take an input
 
 5. I have also configured a small alert rule on the Wazuh side (``Server management -> Rules -> Add new rule``).
 The rule is filtering all trivy_results_o.json by the ``program_name`` attribute which is set to ``trivy-scan`` for all vulnerabilities.
-Rule (could be also found under ``trivy`` directory in Git): 
+Rule (could be also found under ``server-configuration\trivy_rules.xml`` directory in Git): 
 ```
 <group name="custom_vulnerability_rules">
   <rule id="100005" level="14">
