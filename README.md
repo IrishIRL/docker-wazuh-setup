@@ -255,7 +255,8 @@ Screenshot of the output (previosly, results file was called "trivy-results.json
 
 
 As an example, I have also created a small python script that will take an input file "trivy_results_i.json" and clean it to "trivy_results_o.json". Both script (``trivy_script_example.py``) and input/ output files are located under ``trivy`` directory of this Git. For the "trivy_results_i.json" I have all vulnerabilities that were found by trivy tool (around 2400 vulnerabilities). The output file and the following screenshots have only 90 of these vulnerabilities. I have manually left less vulnerabilities in the output file to mitigate overloading my local instance of Wazuh during the test phase. 
-NB! The current script is sending small amount of information about vulnerabilities (vulnerability ID and severity). This was done as an example script that could be implemented. However, for production environment, I would suggest rising the amount of information sent to Wazuh for better visibility.
+
+**NB! The current script is sending small amount of information about vulnerabilities (vulnerability ID and severity). This was done as an example script that could be implemented. However, for production environment, I would suggest rising the amount of information sent to Wazuh for better visibility.**
 
 5. I have also configured a small alert rule on the Wazuh side (``Server management -> Rules -> Add new rule``).
 The rule is filtering all trivy_results_o.json by the ``program_name`` attribute which is set to ``trivy-scan`` for all vulnerabilities.
@@ -278,6 +279,7 @@ Testing newly implemented rule in Wazuh:
 ![Alt text](/screenshots/trivy_rules_test.jpg?raw=true "Testing trivy rule")
 
 Alerts on the Wazuh dashboard page (Main page) after the rule was implemented and logs collected:
+
 ![Alt text](/screenshots/trivy_dashboard_alerts.jpg?raw=true "Main dashboard with 90 new vulnerability alerts")
 
 Deep dive into logs (additional dashboard could be created for that in the future):
