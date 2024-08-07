@@ -40,7 +40,7 @@ docker-compose -f generate-indexer-certs.yml run --rm generator
 docker-compose up -d
 ```
 
-**NB! Please bear in mind that this is a set up for DEV environment. Therefore, there were no specific configurations made, for example all passwords are left default. Docker compose file could be found under: /wazuh-docker/docker-compose.yml**
+**NB! Please bear in mind that this is a set up for DEV environment. Therefore, there were no specific configurations made, for example all passwords are left default. Docker compose file could be found in Git as: docker-compose.yml**
 
 Screenshot after initial Wazuh installation:
 ![Alt text](/screenshots/after_initial_wazuh_install_1.jpg?raw=true "After initial Wazuh install")
@@ -143,7 +143,7 @@ pip3 install docker==7.1.0 urllib3==2.2.2 requests==2.32.2
 ### Wazuh Server configuration
 Several decoders were added to the server via Wazuh visual interface:
 ``Server management -> Decoders -> Custom deecoders -> local_decoders.xml``
-All decoders will be saved under decodes/ section of this Git page.
+Decoders are saved under ``server-configuration\local_decoders.xml`` section of this Git page.
 
 ```
 <decoder name="web-accesslog-docker">
